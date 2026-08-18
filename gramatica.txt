@@ -1,0 +1,40 @@
+?start: programa 
+    ?programa: instruccion 
+              | bloque 
+    ?instrucciones: instruccion | instrucciones instruccion
+    ?bloque: "_comienza_bloque_" instrucciones "_termina_bloque_" 
+             
+    ?instruccion: declaracion "_punto_y_coma_"
+              | invocacion "_punto_y_coma_"
+              | asignacion "_punto_y_coma_"              
+              | seleccion "_punto_y_coma_"     
+              | iteracion "_punto_y_coma_"         
+    ?declaracion: "_se_declaran_con_el_tipo_" tipo "_las_variables_" listavariables
+    ?tipo: "entero" | "largo" | "flotante" | "doble" | "cadena"
+    ?listavariables: NAME | listavariables NAME                                 
+    ?invocacion: "_se_llama_a" NAME "_con_parametros_" "_abre_parentesis_" expresion "_cierra_parentesis_"                
+    ?asignacion: NAME "_se_vuelve_" expresion                                                                   
+    ?seleccion: "_si_" comparacion "_entonces_" bloque "_punto_y_coma_" "_sino_" bloque
+    ?iteracion: "_mientras_que_" comparacion bloque 
+    ?expresion: expresionsimple | comparacion    
+    ?comparacion: expresionsimple comparador expresionsimple 
+    ?comparador: "_es_menor_que_" | "_es_mayor_que_" | "_es_igual_que_" | "_es_mayor_o_igual_que_" | "_es_menor_o_igual_que_" | "_es_distinto_"             
+    ?expresionsimple: termino
+    ?termino: factor
+        | termino "_mas_" factor
+        | termino "_menos_" factor   
+
+    ?factor: atomo
+        | factor "_por_" atomo  
+        | factor "_dividido_" atomo
+        | invocacion
+
+    ?atomo: NUMBER           
+         | "_menos_" atomo         
+         | NAME          
+
+    %import common.CNAME -> NAME
+    %import common.NUMBER
+    %import common.WS_INLINE
+
+    %ignore WS_INLINE

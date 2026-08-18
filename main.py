@@ -8,7 +8,7 @@ from llvmgen import LLVMGen
 
 
 def main():
-    print("--- COMPILADOR JIT EN ESPAÑOL ---")
+    print("--- COMPILADOR JIT ---")
     print("Iniciando modo escucha de 'codigo.txt'...")
 
     lexer = MiLexer()
