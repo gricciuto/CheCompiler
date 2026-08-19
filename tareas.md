@@ -1,6 +1,6 @@
 # Tareas:
-1. Establecer bien la gramática, que vamos a hacer, que tenemos hecho y que falta hacer.
-2. verificar todos los tokens del lexer.
+1. verificar todos los tokens del lexer. ✓
+2. Parser ☠
 3. Generar los nodos
 4. Generar salida ircode
 5. Generar salida haxe

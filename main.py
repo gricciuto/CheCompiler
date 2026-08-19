@@ -3,23 +3,9 @@ from lexer import CheLexer
 def probar_lexer():
     lexer = CheLexer()
 
-    codigo = """
-    comienza
-      entero variables a b c
-      le asigno a 10
-      le asigno b 20
-      le asigno c a mas b
-      si c mayor 25 entonces
-        comienza
-          lo pongo en la epson c
-        termina
-      sino
-        comienza
-          lo pongo en la epson 0
-        termina
-      punto y coma
-    termina
-    """
+    with open("Lexer_Testing/Prueba1", "r", encoding="utf-8") as f:
+        codigo = f.read()
+
 
     print("--- TOKENS ---")
     tokens = lexer.tokenize(codigo)

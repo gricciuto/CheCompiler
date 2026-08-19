@@ -2,15 +2,13 @@ from sly import Lexer
 
 class CheLexer(Lexer):
     # nombres de los tokens. 
-    tokens = {ID,MAS,MENOS,POR,DIVISION,IGUAL,PARENTESIS_IZQ,PARENTESIS_DER,
+    tokens = {MAS,MENOS,POR,DIVISION,IGUAL,PARENTESIS_IZQ,PARENTESIS_DER,
               NUMERO, PUNTO_Y_COMA, ASIGNACION, IF, ELSE,THEN, WHILE, FUNCION, MAYOR, MENOR,
-              MAYOR_IGUAL,DISTINTO, MENOR_IGUAL, TIPO, LLAVE_IZQ,LLAVE_DER,CADENA,IMPRIMIR,BEGIN,END}
+              MAYOR_IGUAL,DISTINTO, MENOR_IGUAL, TIPO, LLAVE_IZQ, LLAVE_DER, CADENA, IMPRIMIR, BEGIN, END, ID}
     ignore = ' \t' 
     ignore_comment = r'\#.*'
     ignore_newline = r'\n+'
-    # expresiones regulares de los tokens 
-    ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
-    # REMAP POR AHORA NO QUE GINO QUIERE PROBAR PARA QUE LE CIERRE EL OJETE
+    # expresiones regulares de los tokens
     MAS = "mas"
     MENOS = "menos"
     POR = "multiplicado"
@@ -40,6 +38,8 @@ class CheLexer(Lexer):
     IMPRIMIR = r'imprimo|lo pongo en la epson|mostrar por pantalla|pantalleame|escupi'
     BEGIN = "comienza"
     END = "termina"
+    CADENA = r'"[^"]*"'
+    ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
     # Line number tracking
     @_(r'\n+')
     def ignore_newline(self, t):
@@ -47,6 +47,7 @@ class CheLexer(Lexer):
 
     def error(self, t):
         print('Line %d: Bad character %r' % (self.lineno, t.value[0]))
+        raise SyntaxError
         self.index += 1
 
 
