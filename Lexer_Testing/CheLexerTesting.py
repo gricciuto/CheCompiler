@@ -1,5 +1,5 @@
 import pytest
-from lexer import CheLexer
+from CheLexer import CheLexer
 
 def tokenizar(codigo):
     lexer = CheLexer()

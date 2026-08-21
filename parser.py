@@ -1,5 +1,5 @@
 from sly import Parser
-from lexer import MiLexer
+from CheLexer import MiLexer
 import ast_nodes as ast
 
 class MiParser(Parser):

@@ -1,4 +1,4 @@
-from lexer import CheLexer
+from CheLexer import CheLexer
 
 def probar_lexer():
     lexer = CheLexer()

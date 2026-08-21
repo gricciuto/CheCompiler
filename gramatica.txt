@@ -29,12 +29,6 @@
         | factor "_dividido_" atomo
         | invocacion
 
-    ?atomo: NUMBER           
-         | "_menos_" atomo         
-         | NAME          
-
-    %import common.CNAME -> NAME
-    %import common.NUMBER
-    %import common.WS_INLINE
-
-    %ignore WS_INLINE
+    ?atomo: NUMBER
+         | MENOS atomo
+         | NAME
