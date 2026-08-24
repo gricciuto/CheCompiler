@@ -4,11 +4,18 @@ class CheLexer(Lexer):
     # nombres de los tokens. 
     tokens = {MAS,MENOS,POR,DIVISION,IGUAL,PARENTESIS_IZQ,PARENTESIS_DER,
               NUMERO, PUNTO_Y_COMA, ASIGNACION, IF, ELSE,THEN, WHILE, FUNCION, MAYOR, MENOR,
-              MAYOR_IGUAL,DISTINTO, MENOR_IGUAL, TIPO, LLAVE_IZQ, LLAVE_DER, CADENA, IMPRIMIR, BEGIN, END, ID}
+              MAYOR_IGUAL,DISTINTO, MENOR_IGUAL, TIPO, LLAVE_IZQ, LLAVE_DER, CADENA, IMPRIMIR, BEGIN, END, ID, Y, INVOCO,CON_PARAMETROS,DECLARO,LAS_VARIABLES}
     ignore = ' \t' 
     ignore_comment = r'\#.*'
-    ignore_newline = r'\n+'
+    @_(r'es|que')
+    def FILLER(self, t):
+        pass  # retorna None → el token se descarta
     # expresiones regulares de los tokens
+    CON_PARAMETROS = r'con\s+parametros'
+    INVOCO = r'invoco|llamo a'
+    DECLARO =r'declaro|se declara|se presentan|aparecieron|se declaran'
+    LAS_VARIABLES = r'las variables'
+    Y = 'y'
     MAS = "mas"
     MENOS = "menos"
     POR = "multiplicado"
@@ -47,8 +54,8 @@ class CheLexer(Lexer):
 
     def error(self, t):
         print('Line %d: Bad character %r' % (self.lineno, t.value[0]))
-        raise SyntaxError
         self.index += 1
+        raise SyntaxError
 
 
     
