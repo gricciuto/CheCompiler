@@ -30,7 +30,10 @@ class CheParser(Parser):
         return p[0]
     @_('IMPRIMIR PARENTESIS_IZQ expresion PARENTESIS_DER')
     def imprimir(self,p):
-        return ast.Imprimir(p.expresion)
+        return ast.Imprimir(p.expresion, lineno = p.lineno)
+    @_('IMPRIMIR PARENTESIS_IZQ CADENA PARENTESIS_DER')
+    def imprimir(self,p):
+        return ast.Imprimir(p.CADENA, lineno = p.lineno)
     @_('DECLARO TIPO LAS_VARIABLES listavariables')
     def declaracion(self,p):
         return ast.Declaracion(p.TIPO,p.listavariables)
@@ -46,12 +49,12 @@ class CheParser(Parser):
             return p.listavariables
     @_('INVOCO ID CON_PARAMETROS PARENTESIS_IZQ expresion PARENTESIS_DER')
     def invocacion(self,p):
-        return ast.Invocacion(p.ID,p.expresion)
+        return ast.Invocacion(p.ID,p.expresion, lineno = p.lineno)
 
     @_('ID ASIGNACION expresion')
     def asignacion(self,p):
         return ast.Asignacion(p.ID,p.expresion)
-    @_(' IF comparacion THEN bloque ELSE bloque')
+    @_(' IF comparacion THEN bloque PUNTO_Y_COMA ELSE bloque')
     def seleccion(self,p):
         return ast.InstruccionSi(p.comparacion,p.bloque0,p.bloque1)
     @_('IF comparacion THEN bloque')
@@ -89,7 +92,7 @@ class CheParser(Parser):
         return ast.BinOp(p.factor,p[1],p.atomo)
     @_('ID')
     def atomo(self,p):
-        return ast.Variable(p.ID)
+        return ast.Variable(p.ID, lineno = p.lineno)
     @_('MENOS atomo')
     def atomo(self,p):
         return ast.BinOp(ast.Valor(0), 'MENOS', p.atomo)

@@ -29,8 +29,8 @@ class CheLexer(Lexer):
         return t
     PUNTO_Y_COMA = "punto y coma"
     ASIGNACION = "le asigno"
-    IF = "si"
     ELSE = "sino"
+    IF = "si"
     THEN = "entonces"
     WHILE = "mientras"
     FUNCION = "funcion"
