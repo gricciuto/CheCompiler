@@ -25,7 +25,7 @@ class CheParser(Parser):
     @_('BEGIN instrucciones END')
     def bloque(self,p):
         return p.instrucciones
-    @_('declaracion PUNTO_Y_COMA', 'invocacion PUNTO_Y_COMA', 'asignacion PUNTO_Y_COMA', 'seleccion PUNTO_Y_COMA', 'iteracion PUNTO_Y_COMA', 'imprimir PUNTO_Y_COMA')
+    @_('declaracion PUNTO_Y_COMA', 'invocacion PUNTO_Y_COMA', 'asignacion PUNTO_Y_COMA', 'seleccion', 'iteracion PUNTO_Y_COMA', 'imprimir PUNTO_Y_COMA')
     def instruccion (self,p):
         return p[0]
     @_('IMPRIMIR PARENTESIS_IZQ expresion PARENTESIS_DER')
@@ -49,15 +49,15 @@ class CheParser(Parser):
             return p.listavariables
     @_('INVOCO ID CON_PARAMETROS PARENTESIS_IZQ expresion PARENTESIS_DER')
     def invocacion(self,p):
-        return ast.Invocacion(p.ID,p.expresion, lineno = p.lineno)
+        return ast.Invocacion(p.ID,p.expresion, lineno = p.lineno) #ESTE LINENO es para contar las lineas.
 
     @_('ID ASIGNACION expresion')
     def asignacion(self,p):
         return ast.Asignacion(p.ID,p.expresion)
-    @_(' IF comparacion THEN bloque PUNTO_Y_COMA ELSE bloque')
+    @_(' IF comparacion THEN bloque PUNTO_Y_COMA ELSE bloque PUNTO_Y_COMA')
     def seleccion(self,p):
         return ast.InstruccionSi(p.comparacion,p.bloque0,p.bloque1)
-    @_('IF comparacion THEN bloque')
+    @_('IF comparacion THEN bloque PUNTO_Y_COMA')
     def seleccion (self,p):
         return ast.InstruccionSi(p.comparacion,p.bloque,[])
     @_('WHILE comparacion bloque')
@@ -103,6 +103,11 @@ class CheParser(Parser):
     @_('NUMERO')
     def atomo(self,p):
         return ast.Valor(p.NUMERO)
+    def error(self,p):
+        if p:
+            raise SyntaxError(f"Error de sintaxis en '{p.value}' (linea {p.lineno})")
+        raise SyntaxError("Error de sintaxis: fin de archivo inesperado")
+    
 
 
 

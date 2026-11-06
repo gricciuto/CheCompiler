@@ -34,9 +34,10 @@ class Asignacion(Nodo):
     def imprimir(self):
         print("ASIGNACION A: ", self.id, " EL VALOR: ", self.valor)
 class Invocacion(Nodo):
-    def __init__(self,nombre,argumento):
+    def __init__(self,nombre,argumento, lineno=None):
         self.nombre = nombre
         self.argumento = argumento
+        self.lineno = lineno
     def imprimir(self):
         print("INVOCO: ",self.nombre, "CON ARGUMENTOS: ", self.argumento)
 class Declaracion (Nodo):

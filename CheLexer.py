@@ -4,7 +4,7 @@ class CheLexer(Lexer):
     # nombres de los tokens. 
     tokens = {MAS,MENOS,POR,DIVISION,IGUAL,PARENTESIS_IZQ,PARENTESIS_DER,
               NUMERO, PUNTO_Y_COMA, ASIGNACION, IF, ELSE,THEN, WHILE, FUNCION, MAYOR, MENOR,
-              MAYOR_IGUAL,DISTINTO, MENOR_IGUAL, TIPO, LLAVE_IZQ, LLAVE_DER, CADENA, IMPRIMIR, BEGIN, END, ID, Y, INVOCO,CON_PARAMETROS,DECLARO,LAS_VARIABLES}
+              MAYOR_IGUAL,DISTINTO, MENOR_IGUAL, TIPO, LLAVE_IZQ, LLAVE_DER, CADENA, IMPRIMIR, BEGIN, END, ID, Y, INVOCO,CON_PARAMETROS,DECLARO,LAS_VARIABLES, PUNTO}
     ignore = ' \t' 
     ignore_comment = r'\#.*'
     @_(r'\bes\b|\bque\b')
@@ -23,11 +23,12 @@ class CheLexer(Lexer):
     IGUAL = r'\bigual\b'
     PARENTESIS_IZQ = r'\babro parentesis\b'
     PARENTESIS_DER =r'\bcierro parentesis\b'
-    @_(r'\d+')
+    @_(r'\d+(?:\.\d+)?')
     def NUMERO(self, t):
-        t.value = int(t.value)
+        t.value = float(t.value) if '.' in t.value else int(t.value)
         return t
     PUNTO_Y_COMA = r'\bpunto y coma\b'
+    PUNTO = r'\bpunto\b'
     ASIGNACION = r'\ble asigno\b'
     ELSE = r'\bsino\b'
     IF = r'\bsi\b'
@@ -39,7 +40,7 @@ class CheLexer(Lexer):
     MENOR_IGUAL = r'\bmenor igual\b'
     MAYOR = r'\bmayor\b'
     MENOR = r'\bmenor\b'
-    TIPO = r'\b(?:entero|flotante|cadena)\b'
+    TIPO = r'\b(?:entero|flotante|cadena|doble)\b' # dejamos estos tipos nomas, estamos abierto a cambios .
     LLAVE_IZQ = r'\babro llave\b'
     LLAVE_DER = r'\bcierro llave\b'
     IMPRIMIR = r'\b(?:imprimo|lo pongo en la epson|mostrar por pantalla|pantalleame|escupi)\b'
