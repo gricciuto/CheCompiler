@@ -7,44 +7,44 @@ class CheLexer(Lexer):
               MAYOR_IGUAL,DISTINTO, MENOR_IGUAL, TIPO, LLAVE_IZQ, LLAVE_DER, CADENA, IMPRIMIR, BEGIN, END, ID, Y, INVOCO,CON_PARAMETROS,DECLARO,LAS_VARIABLES}
     ignore = ' \t' 
     ignore_comment = r'\#.*'
-    @_(r'es|que')
+    @_(r'\bes\b|\bque\b')
     def FILLER(self, t):
         pass  # retorna None → el token se descarta
     # expresiones regulares de los tokens
-    CON_PARAMETROS = r'con\s+parametros'
-    INVOCO = r'invoco|llamo a'
-    DECLARO =r'declaro|se declara|se presentan|aparecieron|se declaran'
-    LAS_VARIABLES = r'las variables'
-    Y = 'y'
-    MAS = "mas"
-    MENOS = "menos"
-    POR = "multiplicado"
-    DIVISION = "dividido"
-    IGUAL = "igual"
-    PARENTESIS_IZQ = "abro parentesis"
-    PARENTESIS_DER ="cierro parentesis"
+    CON_PARAMETROS = r'\bcon\s+parametros\b'
+    INVOCO = r'\b(?:invoco|llamo a)\b'
+    DECLARO =r'\b(?:declaro|se declara|se presentan|aparecieron|se declaran)\b'
+    LAS_VARIABLES = r'\blas variables\b'
+    Y = r'\by\b'
+    MAS = r'\bmas\b'
+    MENOS = r'\bmenos\b'
+    POR = r'\bmultiplicado\b'
+    DIVISION = r'\bdividido\b'
+    IGUAL = r'\bigual\b'
+    PARENTESIS_IZQ = r'\babro parentesis\b'
+    PARENTESIS_DER =r'\bcierro parentesis\b'
     @_(r'\d+')
     def NUMERO(self, t):
         t.value = int(t.value)
         return t
-    PUNTO_Y_COMA = "punto y coma"
-    ASIGNACION = "le asigno"
-    ELSE = "sino"
-    IF = "si"
-    THEN = "entonces"
-    WHILE = "mientras"
-    FUNCION = "funcion"
-    MAYOR = "mayor"
-    MENOR = "menor"
-    MAYOR_IGUAL = "mayor igual"
-    DISTINTO = "distinto"
-    MENOR_IGUAL = "menor igual"
-    TIPO = r'entero|flotante|cadena'
-    LLAVE_IZQ = "abro llave"
-    LLAVE_DER = "cierro llave"
-    IMPRIMIR = r'imprimo|lo pongo en la epson|mostrar por pantalla|pantalleame|escupi'
-    BEGIN = "comienza"
-    END = "termina"
+    PUNTO_Y_COMA = r'\bpunto y coma\b'
+    ASIGNACION = r'\ble asigno\b'
+    ELSE = r'\bsino\b'
+    IF = r'\bsi\b'
+    THEN = r'\bentonces\b'
+    WHILE = r'\bmientras\b'
+    FUNCION = r'\bfuncion\b'
+    MAYOR_IGUAL = r'\bmayor igual\b'
+    DISTINTO = r'\bdistinto\b'
+    MENOR_IGUAL = r'\bmenor igual\b'
+    MAYOR = r'\bmayor\b'
+    MENOR = r'\bmenor\b'
+    TIPO = r'\b(?:entero|flotante|cadena)\b'
+    LLAVE_IZQ = r'\babro llave\b'
+    LLAVE_DER = r'\bcierro llave\b'
+    IMPRIMIR = r'\b(?:imprimo|lo pongo en la epson|mostrar por pantalla|pantalleame|escupi)\b'
+    BEGIN = r'\bcomienza\b'
+    END = r'\btermina\b'
     CADENA = r'"[^"]*"'
     ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
     # Line number tracking
