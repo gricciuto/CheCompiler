@@ -3,6 +3,7 @@ if __name__ == "__main__":
     from CheLexer import CheLexer
     from CheParser import CheParser
     from GeneradorCodigoIR import *
+    from Che
 
     lexer = CheLexer()
     parser = CheParser()
@@ -75,6 +76,7 @@ if __name__ == "__main__":
 
     ast = parser.parse(lexer.tokenize(codigo))
     module = generador.generar_programa(ast)
+
     print("AST Resultante:")
     print("=" * 50)
     for inst in ast:

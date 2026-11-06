@@ -2,16 +2,19 @@ class Nodo:
     def imprimir(self):
         pass
     pass
+#probar con agregar un nodo (negativos) para los numeros negativos
 class Valor(Nodo):
-    def __init__(self,valor):
+    def __init__(self,valor, tipo):
         self.valor = valor
+        self.tipo = tipo
     def imprimir(self,prefijo):
         print(f"{prefijo}VALOR: ",self.valor)
 class BinOp(Nodo):
-    def __init__(self,valora, operador, valorb):
+    def __init__(self,valora, operador, valorb, lineno = None):
         self.valora = valora
         self.valorb = valorb
         self.operador = operador
+        self.lineno = lineno
     def imprimir(self):
         print("OP BINARIA: ",self.valora, self.operador, self.valorb)
 class InstruccionMientras (Nodo):
