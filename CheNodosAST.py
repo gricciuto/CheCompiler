@@ -4,9 +4,10 @@ class Nodo:
     pass
 #probar con agregar un nodo (negativos) para los numeros negativos
 class Valor(Nodo):
-    def __init__(self,valor, tipo):
+    def __init__(self,valor, tipo, lineno=None):
         self.valor = valor
         self.tipo = tipo
+        self.lineno = lineno
     def imprimir(self,prefijo):
         print(f"{prefijo}VALOR: ",self.valor)
 class BinOp(Nodo):
@@ -71,4 +72,11 @@ class Variable(Nodo):
         self.nombre = nombre
     def imprimir(self):
         print("VARIABLE: ", self.nombre)
+class Negativo(Nodo):
+    def __init__(self,operando,lineno = None):
+        self.operando = operando
+        self.lineno = lineno
+    def imprimir(self):
+        print("NEGATIVO: ", self.operando)
+
 

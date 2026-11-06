@@ -37,10 +37,10 @@ class CheParser(Parser):
     @_('IMPRIMIR PARENTESIS_IZQ CADENA PARENTESIS_DER')
     def imprimir(self,p):
         # con [1:-1] se les saca las comillas que trae de el lexer
-        return ast.Imprimir(ast.Valor(p.CADENA[1:-1], 'cadena'), lineno = p.lineno)
+        return ast.Imprimir(ast.Valor(p.CADENA[1:-1], 'cadena', lineno= p.lineno), lineno = p.lineno)
     @_('DECLARO TIPO LAS_VARIABLES listavariables')
     def declaracion(self,p):
-        return ast.Declaracion(p.TIPO,p.listavariables)
+        return ast.Declaracion(p.TIPO,p.listavariables, lineno= p.lineno)
     @_('TIPO')
     def tipo(self,p):
         return p.TIPO
@@ -57,22 +57,22 @@ class CheParser(Parser):
 
     @_('ID ASIGNACION expresion')
     def asignacion(self,p):
-        return ast.Asignacion(p.ID,p.expresion)
+        return ast.Asignacion(p.ID,p.expresion, lineno= p.lineno)
     @_(' IF comparacion THEN bloque PUNTO_Y_COMA ELSE bloque PUNTO_Y_COMA')
     def seleccion(self,p):
-        return ast.InstruccionSi(p.comparacion,p.bloque0,p.bloque1)
+        return ast.InstruccionSi(p.comparacion,p.bloque0,p.bloque1,lineno=p.lineno)
     @_('IF comparacion THEN bloque PUNTO_Y_COMA')
     def seleccion (self,p):
-        return ast.InstruccionSi(p.comparacion,p.bloque,[])
+        return ast.InstruccionSi(p.comparacion,p.bloque,[], lineno=p.lineno)
     @_('WHILE comparacion bloque')
     def iteracion(self,p):
-        return ast.InstruccionMientras(p.comparacion,p.bloque)
+        return ast.InstruccionMientras(p.comparacion,p.bloque, lineno=p.lineno)
     @_('expresionsimple', 'comparacion')
     def expresion(self,p):
         return p[0]
     @_('expresionsimple comparador expresionsimple')
     def comparacion(self,p):
-        return ast.BinOp(p.expresionsimple0,p[1],p.expresionsimple1)
+        return ast.BinOp(p.expresionsimple0,p[1],p.expresionsimple1, lineno=p.expresionsimple0.lineno)
     @_('MENOR','MAYOR','IGUAL','MENOR_IGUAL','DISTINTO','MAYOR_IGUAL')
     def comparador(self,p):
         return p[0]
@@ -81,7 +81,7 @@ class CheParser(Parser):
         return p.termino
     @_('termino MAS factor','termino MENOS factor')
     def termino(self,p):
-        return ast.BinOp(p.termino, p[1], p.factor)
+        return ast.BinOp(p.termino, p[1], p.factor, lineno=p.lineno)
     @_('factor')
     def termino(self,p):
         return p.factor
@@ -93,13 +93,13 @@ class CheParser(Parser):
         return p.invocacion
     @_('factor POR atomo','factor DIVISION atomo')
     def factor(self,p):
-        return ast.BinOp(p.factor,p[1],p.atomo)
+        return ast.BinOp(p.factor,p[1],p.atomo, lineno= p.lineno)
     @_('ID')
     def atomo(self,p):
         return ast.Variable(p.ID, lineno = p.lineno)
     @_('MENOS atomo')
     def atomo(self,p):
-        return ast.BinOp(ast.Valor(0), "-", p.atomo)
+        return ast.Negativo(p.atomo,lineno = p.lineno)
 
     @_('PARENTESIS_IZQ expresion PARENTESIS_DER')
     def atomo(self, p):
@@ -107,7 +107,7 @@ class CheParser(Parser):
     @_('NUMERO')
     def atomo(self,p):
         tipo = 'entero' if isinstance(p.NUMERO, int) else 'flotante'
-        return ast.Valor(p.NUMERO,tipo)
+        return ast.Valor(p.NUMERO,tipo,lineno = p.lineno)
     def error(self,p):
         if p:
             raise SyntaxError(f"Error de sintaxis en '{p.value}' (linea {p.lineno})")

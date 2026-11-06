@@ -3,7 +3,6 @@ if __name__ == "__main__":
     from CheLexer import CheLexer
     from CheParser import CheParser
     from GeneradorCodigoIR import *
-    from Che
 
     lexer = CheLexer()
     parser = CheParser()
@@ -40,6 +39,9 @@ if __name__ == "__main__":
             print(f"{prefijo}BinOp({nodo.operador})")
             mostrar_ast(nodo.valora, indent + 1)
             mostrar_ast(nodo.valorb, indent + 1)
+        elif nombre == "Negativo":
+            print(f"{prefijo}Negativo")
+            mostrar_ast(nodo.operando, indent + 1)
         elif nombre == "Declaracion":
             print(f"{prefijo}Declaracion({nodo.tipo})")
             for v in nodo.lista_variables:

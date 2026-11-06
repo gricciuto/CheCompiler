@@ -10,4 +10,4 @@ SIGUIENTES
 4. Generar salida ircode
 5. Generar salida haxe
 6. Entrada por voz
-7. Hacer que llvm genere wasm y usar wasm2haxe para convertirlo
+7. ESTO NO PAPÁ CAMBIAMSOS Hacer que llvm genere wasm y usar wasm2haxe para convertirlo
