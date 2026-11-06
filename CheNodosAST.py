@@ -15,22 +15,29 @@ class BinOp(Nodo):
     def imprimir(self):
         print("OP BINARIA: ",self.valora, self.operador, self.valorb)
 class InstruccionMientras (Nodo):
-    def __init__(self,condicion,cuerpo):
+    def __init__(self,condicion,cuerpo,lineno = None):
         self.condicion = condicion
         self.cuerpo = cuerpo
+        self.lineno = lineno
+
     def imprimir(self):
         print("MIENTRAS: ",self.condicion, "HACER: ", self.cuerpo)
 class InstruccionSi (Nodo):
-    def __init__(self,condicion,bloqueverdadero,bloquefalso):
+    def __init__(self,condicion,bloqueverdadero,bloquefalso,lineno = None):
         self.condicion = condicion
         self.bloqueverdadero = bloqueverdadero
         self.bloquefalso = bloquefalso
+        self.lineno = lineno
+
+
     def imprimir(self):
         print("SI: ", self.condicion, "HACER: ", self.bloqueverdadero, "SINO: ", self.bloquefalso)
 class Asignacion(Nodo):
-    def __init__(self,id,valor):
+    def __init__(self,id,valor,lineno = None):
         self.id = id
         self.valor = valor
+        self.lineno = lineno
+
     def imprimir(self):
         print("ASIGNACION A: ", self.id, " EL VALOR: ", self.valor)
 class Invocacion(Nodo):
@@ -41,13 +48,16 @@ class Invocacion(Nodo):
     def imprimir(self):
         print("INVOCO: ",self.nombre, "CON ARGUMENTOS: ", self.argumento)
 class Declaracion (Nodo):
-    def __init__(self,tipo, lista_variables):
+    def __init__(self,tipo, lista_variables,lineno = None):
         self.tipo = tipo
         self.lista_variables = lista_variables
+        self.lineno = lineno
+
     def imprimir(self):
         print("DECLARO TIPO: ", self.tipo, " VARIABLES: ", self.lista_variables)
 class Imprimir(Nodo):
-    def __init__(self,valor, lineno):
+    def __init__(self,valor, lineno = None):
+        #deberiamos poder pasarle una variable tambien para que la imprima, o una expresion
         self.lineno = lineno
         self.valor = valor
     def imprimir(self):

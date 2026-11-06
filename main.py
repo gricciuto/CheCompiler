@@ -2,9 +2,12 @@
 if __name__ == "__main__":
     from CheLexer import CheLexer
     from CheParser import CheParser
+    from GeneradorCodigoIR import *
 
     lexer = CheLexer()
     parser = CheParser()
+    generador = CodeGenerator()
+
 
     codigo = '''comienza
       declaro entero las variables a b c punto y coma
@@ -71,7 +74,7 @@ if __name__ == "__main__":
 
 
     ast = parser.parse(lexer.tokenize(codigo))
-
+    module = generador.generar_programa(ast)
     print("AST Resultante:")
     print("=" * 50)
     for inst in ast:

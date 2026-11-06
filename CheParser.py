@@ -12,9 +12,12 @@ class CheParser(Parser):
         ('left', MAS, MENOS),
         ('left', POR, DIVISION)
     )
-    @_('bloque','instruccion')
+    @_('bloque')
     def programa(self,p):
         return p[0]
+    @_('instruccion')
+    def programa(self,p):
+        return [p.instruccion]
     @_('instruccion', 'instrucciones instruccion')
     def instrucciones(self,p):
         if len(p) == 1:
@@ -33,7 +36,7 @@ class CheParser(Parser):
         return ast.Imprimir(p.expresion, lineno = p.lineno)
     @_('IMPRIMIR PARENTESIS_IZQ CADENA PARENTESIS_DER')
     def imprimir(self,p):
-        return ast.Imprimir(p.CADENA, lineno = p.lineno)
+        return ast.Imprimir(ast.Valor(p.CADENA), lineno = p.lineno)
     @_('DECLARO TIPO LAS_VARIABLES listavariables')
     def declaracion(self,p):
         return ast.Declaracion(p.TIPO,p.listavariables)
@@ -95,7 +98,7 @@ class CheParser(Parser):
         return ast.Variable(p.ID, lineno = p.lineno)
     @_('MENOS atomo')
     def atomo(self,p):
-        return ast.BinOp(ast.Valor(0), 'MENOS', p.atomo)
+        return ast.BinOp(ast.Valor(0), "-", p.atomo)
 
     @_('PARENTESIS_IZQ expresion PARENTESIS_DER')
     def atomo(self, p):
