@@ -14,7 +14,7 @@ class CodeGenerator:
         self.i1 = ir.IntType(1)
         self.float = ir.FloatType()
         self.double = ir.DoubleType()
-        self.string = ir.ArrayType()
+        self.string = ir.ArrayType(self.i8, 0)
         # Declarar printf externo (de C) para que funcione generar_imprimir
         voidptr_ty = self.i8.as_pointer()
         printf_ty = ir.FunctionType(self.i32, [voidptr_ty], var_arg=True)
