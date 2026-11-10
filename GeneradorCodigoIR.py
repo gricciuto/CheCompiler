@@ -128,6 +128,15 @@ class CodeGenerator:
                 return self.builder.icmp_signed("!=", izquierda, derecha)
             else:
                 raise Exception(f"Operador desconocido: {operador}")
+        elif  isinstance(nodo, Negativo):
+            #Accede al tipo del valor que contiene el nodo negativo
+            if nodo.valor.tipo == 'entero':
+                #tosco mal
+                return ir.Constant(self.i32, -nodo.valor.valor)
+            if nodo.valor.tipo == 'flotante':
+                return ir.Constant(self.float, -nodo.valor.valor)
+            if nodo.valor.tipo == 'doble':
+                return ir.Constant(self.double, -nodo.valor.valor)
 
         raise Exception(f"Expresion no soportada: {type(nodo).__name__}")
 

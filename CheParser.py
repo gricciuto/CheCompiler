@@ -100,7 +100,6 @@ class CheParser(Parser):
     @_('MENOS atomo')
     def atomo(self,p):
         return ast.Negativo(p.atomo,lineno = p.lineno)
-
     @_('PARENTESIS_IZQ expresion PARENTESIS_DER')
     def atomo(self, p):
         return p.expresion

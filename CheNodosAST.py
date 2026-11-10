@@ -73,10 +73,10 @@ class Variable(Nodo):
     def imprimir(self):
         print("VARIABLE: ", self.nombre)
 class Negativo(Nodo):
-    def __init__(self,operando,lineno = None):
-        self.operando = operando
+    def __init__(self,valor,lineno = None):
+        self.valor = valor
         self.lineno = lineno
     def imprimir(self):
-        print("NEGATIVO: ", self.operando)
+        print("NEGATIVO: ", self.valor)
 
 
