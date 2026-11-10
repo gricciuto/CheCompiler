@@ -25,7 +25,7 @@ class CheLexer(Lexer):
     PARENTESIS_DER =r'\bcierro parentesis\b'
     PUNTO_Y_COMA = r'\bpunto y coma\b'
     PUNTO = r'\bpunto\b'
-    COMA = r'\coma\b'
+    COMA = r'\bcoma\b'
     #Hay que corregir esto para que se reconozcan los flotantes
     @_(r'\d+')
     def NUMERO(self, t):

@@ -35,6 +35,7 @@ class CodeGenerator:
         # Formatos globales para printf
         self.fmt_int = self._crear_constante_str("%d\n\0", "fmt_int")
         self.fmt_str = self._crear_constante_str("%s\n\0", "fmt_str")
+        self.fmt_float = self._crear_constante_str("%g\n\0", "fmt_float")
 
     def _crear_constante_str(self, texto, nombre):
         bytes_val = bytearray(texto.encode("utf-8"))
