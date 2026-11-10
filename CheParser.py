@@ -107,6 +107,10 @@ class CheParser(Parser):
     def atomo(self,p):
         tipo = 'entero' if isinstance(p.NUMERO, int) else 'flotante'
         return ast.Valor(p.NUMERO,tipo,lineno = p.lineno)
+    @('NUMERO PUNTO NUMERO')
+    def atomo(self,p):
+        valor = float(f"{p.NUMERO0}.{p.NUMERO1}")
+        return ast.Valor(valor,'flotante',lineno = p.lineno)
     def error(self,p):
         if p:
             raise SyntaxError(f"Error de sintaxis en '{p.value}' (linea {p.lineno})")
