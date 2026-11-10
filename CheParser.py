@@ -107,7 +107,7 @@ class CheParser(Parser):
     def atomo(self,p):
         tipo = 'entero' if isinstance(p.NUMERO, int) else 'flotante'
         return ast.Valor(p.NUMERO,tipo,lineno = p.lineno)
-    @_('NUMERO PUNTO NUMERO')
+    @_('NUMERO PUNTO NUMERO', 'NUMERO COMA NUMERO')
     def atomo(self,p):
         valor = float(f"{p.NUMERO0}.{p.NUMERO1}")
         return ast.Valor(valor,'flotante',lineno = p.lineno)

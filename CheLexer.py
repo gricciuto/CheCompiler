@@ -4,7 +4,7 @@ class CheLexer(Lexer):
     # nombres de los tokens. 
     tokens = {MAS,MENOS,POR,DIVISION,IGUAL,PARENTESIS_IZQ,PARENTESIS_DER,
               NUMERO, PUNTO_Y_COMA, ASIGNACION, IF, ELSE,THEN, WHILE, FUNCION, MAYOR, MENOR,
-              MAYOR_IGUAL,DISTINTO, MENOR_IGUAL, TIPO, LLAVE_IZQ, LLAVE_DER, CADENA, IMPRIMIR, BEGIN, END, ID, Y, INVOCO,CON_PARAMETROS,DECLARO,LAS_VARIABLES, PUNTO}
+              MAYOR_IGUAL,DISTINTO, MENOR_IGUAL, TIPO, LLAVE_IZQ, LLAVE_DER, CADENA, IMPRIMIR, BEGIN, END, ID, Y, INVOCO,CON_PARAMETROS,DECLARO,LAS_VARIABLES, PUNTO, COMA}
     ignore = ' \t' 
     ignore_comment = r'\#.*'
     @_(r'\bes\b|\bque\b')
@@ -25,10 +25,11 @@ class CheLexer(Lexer):
     PARENTESIS_DER =r'\bcierro parentesis\b'
     PUNTO_Y_COMA = r'\bpunto y coma\b'
     PUNTO = r'\bpunto\b'
+    COMA = r'\coma\b'
     #Hay que corregir esto para que se reconozcan los flotantes
-    @_(r'\d+(?:\.\d+)?')
+    @_(r'\d+')
     def NUMERO(self, t):
-        t.value = float(t.value) if "punto" in t.value else int(t.value)
+        t.value = int(t.value)
         return t
 
     ASIGNACION = r'\ble asigno\b'
