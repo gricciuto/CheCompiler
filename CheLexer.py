@@ -23,12 +23,14 @@ class CheLexer(Lexer):
     IGUAL = r'\bigual\b'
     PARENTESIS_IZQ = r'\babro parentesis\b'
     PARENTESIS_DER =r'\bcierro parentesis\b'
-    @_(r'\d+(?:\.\d+)?')
-    def NUMERO(self, t):
-        t.value = float(t.value) if '.' in t.value else int(t.value)
-        return t
     PUNTO_Y_COMA = r'\bpunto y coma\b'
     PUNTO = r'\bpunto\b'
+    #Hay que corregir esto para que se reconozcan los flotantes
+    @_(r'\d+(?:\.\d+)?')
+    def NUMERO(self, t):
+        t.value = float(t.value) if "punto" in t.value else int(t.value)
+        return t
+
     ASIGNACION = r'\ble asigno\b'
     ELSE = r'\bsino\b'
     IF = r'\bsi\b'

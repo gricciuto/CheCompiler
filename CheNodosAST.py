@@ -80,3 +80,17 @@ class Negativo(Nodo):
         print("NEGATIVO: ", self.valor)
 
 
+class NodeVisitor:
+    def visit(self, node):
+        # Si recibe una lista de nodos (como el programa o un bloque de instrucciones)
+        if isinstance(node, list):
+            for item in node:
+                self.visit(item)
+        # Si recibe un nodo del AST, busca el método visit_NombreDeLaClase
+        elif isinstance(node, Nodo):
+            method_name = f"visit_{type(node).__name__}"
+            visitor = getattr(self, method_name, self.generic_visit)
+            return visitor(node)
+
+    def generic_visit(self, node):
+        raise Exception(f"No se definió el método visit_{type(node).__name__} en el Visitor")

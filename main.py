@@ -1,7 +1,9 @@
+import sys
 
 if __name__ == "__main__":
     from CheLexer import CheLexer
     from CheParser import CheParser
+    from CheChecker import SemanticError, check_program
     from GeneradorCodigoIR import *
 
     lexer = CheLexer()
@@ -11,11 +13,12 @@ if __name__ == "__main__":
 
     codigo = '''comienza
       declaro entero las variables a b c punto y coma
-      a le asigno 10 punto y coma
+      a le asigno menos 10 punto y coma
       b le asigno 5 punto y coma
       c le asigno a mas b multiplicado 2 punto y coma
       si c mayor 15 entonces comienza
         a le asigno 1 punto y coma
+      d le asigno 5 punto y coma
       termina punto y coma
       sino comienza
         b le asigno 2 punto y coma
@@ -41,7 +44,7 @@ if __name__ == "__main__":
             mostrar_ast(nodo.valorb, indent + 1)
         elif nombre == "Negativo":
             print(f"{prefijo}Negativo")
-            mostrar_ast(nodo.operando, indent + 1)
+            mostrar_ast(nodo.valor, indent + 1)
         elif nombre == "Declaracion":
             print(f"{prefijo}Declaracion({nodo.tipo})")
             for v in nodo.lista_variables:
@@ -77,6 +80,22 @@ if __name__ == "__main__":
 
 
     ast = parser.parse(lexer.tokenize(codigo))
+    try:
+        tabla_simbolos = check_program(ast)
+        print("Análisis semántico exitoso.")
+        print("Variables en tabla de símbolos:", {k: v.tipo for k, v in tabla_simbolos.items()})
+        print("=" * 50)
+    except SemanticError as e:
+        print("ERRORES SEMÁNTICOS ENCONTRADOS:")
+        print(e)
+        sys.exit(1)  # Corta la ejecución para no pasarle un AST inválido a llvmlite
+
+        # Mostramos el AST (ya decorado con los tipos por el Checker)
+    print("AST Resultante:")
+    print("=" * 50)
+    for inst in ast:
+        mostrar_ast(inst)
+        print()
     module = generador.generar_programa(ast)
 
     print("AST Resultante:")
