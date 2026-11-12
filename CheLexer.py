@@ -14,7 +14,7 @@ class CheLexer(Lexer):
     CON_PARAMETROS = r'\bcon\s+parametros\b'
     INVOCO = r'\b(?:invoco|llamo a)\b'
     DECLARO =r'\b(?:declaro|se declara|se presentan|aparecieron|se declaran)\b'
-    LAS_VARIABLES = r'\blas variables\b'
+    LAS_VARIABLES =  r'\b(?:las variables|la variable)\b'
     Y = r'\by\b'
     MAS = r'\bmas\b'
     MENOS = r'\bmenos\b'

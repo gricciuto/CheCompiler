@@ -10,15 +10,16 @@ if __name__ == "__main__":
     generador = CodeGenerator()
 
     codigo = '''comienza
-      declaro entero las variables a b c punto y coma
+      declaro entero las variables a c punto y coma
+      declaro flotante la variable b punto y coma
       a le asigno 10 punto y coma
-      b le asigno "hola" punto y coma
-      c le asigno a mas b multiplicado 2 punto y coma
+      b le asigno 67 punto y coma
+      c le asigno 2 menos menos a punto y coma
       si c mayor 15 entonces comienza
         a le asigno 1 punto y coma
       termina punto y coma
       sino comienza
-        b le asigno 2 punto y coma
+        b le asigno 2 mas 3 punto 6 punto y coma
       termina punto y coma
       mientras a mayor b comienza
         a le asigno a menos 1 punto y coma

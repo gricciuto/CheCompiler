@@ -1,6 +1,5 @@
 from CheNodosAST import *
 
-
 class SemanticError(Exception):
     pass
 

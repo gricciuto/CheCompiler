@@ -34,10 +34,6 @@ class CheParser(Parser):
     @_('IMPRIMIR PARENTESIS_IZQ expresion PARENTESIS_DER')
     def imprimir(self,p):
         return ast.Imprimir(p.expresion, lineno = p.lineno)
-    @_('IMPRIMIR PARENTESIS_IZQ CADENA PARENTESIS_DER')
-    def imprimir(self,p):
-        # con [1:-1] se les saca las comillas que trae de el lexer
-        return ast.Imprimir(ast.Valor(p.CADENA[1:-1], 'cadena', lineno= p.lineno), lineno = p.lineno)
     @_('DECLARO TIPO LAS_VARIABLES listavariables')
     def declaracion(self,p):
         return ast.Declaracion(p.TIPO,p.listavariables, lineno= p.lineno)
@@ -58,6 +54,7 @@ class CheParser(Parser):
     @_('ID ASIGNACION expresion')
     def asignacion(self,p):
         return ast.Asignacion(p.ID,p.expresion, lineno= p.lineno)
+
     @_(' IF comparacion THEN bloque PUNTO_Y_COMA ELSE bloque PUNTO_Y_COMA')
     def seleccion(self,p):
         return ast.InstruccionSi(p.comparacion,p.bloque0,p.bloque1,lineno=p.lineno)
@@ -111,6 +108,9 @@ class CheParser(Parser):
     def atomo(self,p):
         valor = float(f"{p.NUMERO0}.{p.NUMERO1}")
         return ast.Valor(valor,'flotante',lineno = p.lineno)
+    @_('CADENA')
+    def atomo(self, p):
+        return ast.Valor(p.CADENA[1:-1], 'cadena', lineno=p.lineno)
     def error(self,p):
         if p:
             raise SyntaxError(f"Error de sintaxis en '{p.value}' (linea {p.lineno})")

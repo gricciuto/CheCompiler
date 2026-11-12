@@ -37,6 +37,41 @@ class CodeGenerator:
         self.fmt_str = self._crear_constante_str("%s\n\0", "fmt_str")
         self.fmt_float = self._crear_constante_str("%g\n\0", "fmt_float")
 
+    def _convertir_a_tipo(self, valor, tipo_destino):
+        """Convierte un valor LLVM (ej: i32) al tipo_destino (ej: float o double) si no coinciden."""
+        if valor.type == tipo_destino:
+            return valor
+        # De entero (i32) a float o double
+        if valor.type == self.i32 and tipo_destino in (self.float, self.double):
+            return self.builder.sitofp(valor, tipo_destino, name="int_a_float")
+        # De float (32 bits) a double (64 bits)
+        if valor.type == self.float and tipo_destino == self.double:
+            return self.builder.fpext(valor, self.double, name="float_a_double")
+        # De double (64 bits) a float (32 bits)
+        if valor.type == self.double and tipo_destino == self.float:
+            return self.builder.fptrunc(valor, self.float, name="double_a_float")
+        return valor
+
+    def _obtener_tipo_llvm(self, tipo_str):
+        if tipo_str == "entero":
+            return self.i32
+        elif tipo_str == "flotante":
+            return self.float
+        elif tipo_str == "doble":
+            return self.double
+        else:
+            raise Exception(f"Tipo no soportado en LLVM: {tipo_str}")
+
+    def _igualar_tipos_binop(self, izq, der):
+        """Si se opera entre int y float/double, promueve ambos al tipo más grande."""
+        if izq.type == der.type:
+            return izq, der
+        if self.double in (izq.type, der.type):
+            return self._convertir_a_tipo(izq, self.double), self._convertir_a_tipo(der, self.double)
+        if self.float in (izq.type, der.type):
+            return self._convertir_a_tipo(izq, self.float), self._convertir_a_tipo(der, self.float)
+        return izq, der
+
     def _crear_constante_str(self, texto, nombre):
         bytes_val = bytearray(texto.encode("utf-8"))
         tipo_arr = ir.ArrayType(self.i8, len(bytes_val))
@@ -51,13 +86,16 @@ class CodeGenerator:
     # =====================================
 
     def generar_declaracion(self, nodo):
+        tipo_llvm = self._obtener_tipo_llvm(nodo.tipo)
         for nombre in nodo.lista_variables:
             if nombre in self.variables:
                 raise Exception(f"Variable ya declarada: {nombre}")
 
             # Siempre reservar en el bloque entry para evitar fallos en while/if
+            # A CHUSMEAR POR ACA EE cuando se pasa una variable como operando no reconoce el tipo
+            #todo
             with self.builder.goto_entry_block():
-                direccion = self.builder.alloca(self.i32, name=nombre)
+                direccion = self.builder.alloca(tipo_llvm, name=nombre)
 
             self.variables[nombre] = direccion
 
@@ -102,42 +140,55 @@ class CodeGenerator:
         elif isinstance(nodo, BinOp):
             izquierda = self.generar_expresion(nodo.valora)
             derecha = self.generar_expresion(nodo.valorb)
-            operador = nodo.operador.lower()  # .lower() por el 'MENOS' unario del parser
+            izquierda, derecha = self._igualar_tipos_binop(izquierda, derecha)
+            es_flotante = izquierda.type in (self.float, self.double)
+            operador = nodo.operador.lower()
+            print(izquierda.type)
+            print(derecha.type)
+            # En el caso de que sea una operacion entre flotantes hay que crear otro builder
+            if es_flotante :
+                if operador == "mas":
+                    return self.builder.fadd(izquierda, derecha)
+                elif operador == "menos":
+                    return self.builder.fsub(izquierda, derecha)
+                elif operador == "multiplicado":
+                    return self.builder.fmul(izquierda, derecha)
+                elif operador in ("dividido", "/"):
+                    return self.builder.fdiv(izquierda, derecha)
+            else:
 
-            # Operaciones aritmeticas (nombres exactos de CheLexer)
-            if operador == "mas":
-                return self.builder.add(izquierda, derecha)
-            elif operador == "menos":
-                return self.builder.sub(izquierda, derecha)
-            elif operador == "multiplicado":
-                return self.builder.mul(izquierda, derecha)
-            elif operador in ("dividido", "/"):
-                return self.builder.sdiv(izquierda, derecha)
+                # Operaciones aritmeticas (nombres exactos de CheLexer)
+                if operador == "mas":
+                    return self.builder.add(izquierda, derecha)
+                elif operador == "menos":
+                    return self.builder.sub(izquierda, derecha)
+                elif operador == "multiplicado":
+                    return self.builder.mul(izquierda, derecha)
+                elif operador in ("dividido", "/"):
+                    return self.builder.sdiv(izquierda, derecha)
 
             # Comparaciones (nombres exactos de CheLexer)
-            elif operador == "menor":
-                return self.builder.icmp_signed("<", izquierda, derecha)
-            elif operador == "mayor":
-                return self.builder.icmp_signed(">", izquierda, derecha)
-            elif operador in ("menor igual", "<="):
-                return self.builder.icmp_signed("<=", izquierda, derecha)
-            elif operador in ("mayor igual", ">="):
-                return self.builder.icmp_signed(">=", izquierda, derecha)
-            elif operador in ("igual", "=="):
-                return self.builder.icmp_signed("==", izquierda, derecha)
-            elif operador in ("distinto", "!="):
-                return self.builder.icmp_signed("!=", izquierda, derecha)
+            mapa_cmp = {
+                "menor": "<",
+                "mayor": ">",
+                "menor igual": "<=", "<=": "<=",
+                "mayor igual": ">=", ">=": ">=",
+                "igual": "==", "==": "==",
+                "distinto": "!=", "!=": "!="
+            }
+            if operador in mapa_cmp:
+                simbolo = mapa_cmp[operador]
+                if es_flotante:
+                    return self.builder.fcmp_ordered(simbolo, izquierda, derecha)
+                else:
+                    return self.builder.icmp_signed(simbolo, izquierda, derecha)
             else:
                 raise Exception(f"Operador desconocido: {operador}")
-        elif  isinstance(nodo, Negativo):
-            #Accede al tipo del valor que contiene el nodo negativo
-            if nodo.valor.tipo == 'entero':
-                #tosco mal
-                return ir.Constant(self.i32, -nodo.valor.valor)
-            if nodo.valor.tipo == 'flotante':
-                return ir.Constant(self.float, -nodo.valor.valor)
-            if nodo.valor.tipo == 'doble':
-                return ir.Constant(self.double, -nodo.valor.valor)
+        elif isinstance(nodo, Negativo):
+            val = self.generar_expresion(nodo.valor)
+            if val.type in (self.float, self.double):
+                return self.builder.fneg(val)
+            return self.builder.neg(val)
 
         raise Exception(f"Expresion no soportada: {type(nodo).__name__}")
 
@@ -151,6 +202,9 @@ class CodeGenerator:
 
         valor = self.generar_expresion(nodo.valor)
         direccion = self.variables[nodo.id]
+        tipo_variable = direccion.type.pointee
+        if valor.type == self.i32 and tipo_variable in (self.float, self.double):
+            valor = self.builder.sitofp(valor, tipo_variable)
         self.builder.store(valor, direccion)
 
     # =====================================
@@ -173,10 +227,17 @@ class CodeGenerator:
         else:
             valor = self.generar_expresion(nodo.valor)
             # Si imprimen una comparacion (i1), pasarla a i32 para printf
-            if valor.type == self.i1:
-                valor = self.builder.zext(valor, self.i32)
-            ptr_fmt = self.builder.gep(self.fmt_int, [cero, cero], inbounds=True)
-            self.builder.call(self.printf, [ptr_fmt, valor])
+            if valor.type in (self.float, self.double):
+                if valor.type == self.float:
+                    valor = self.builder.fpext(valor, self.double)
+                ptr_fmt = self.builder.gep(self.fmt_float, [cero, cero], inbounds=True)
+                self.builder.call(self.printf, [ptr_fmt, valor])
+            else:
+                # Lo que ya tenías para enteros:
+                if valor.type == self.i1:
+                    valor = self.builder.zext(valor, self.i32)
+                ptr_fmt = self.builder.gep(self.fmt_int, [cero, cero], inbounds=True)
+                self.builder.call(self.printf, [ptr_fmt, valor])
 
     # =====================================
     # Generar instrucciones y bloques
