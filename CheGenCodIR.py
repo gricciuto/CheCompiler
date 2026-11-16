@@ -19,7 +19,7 @@ class CodeGenerator:
         printf_ty = ir.FunctionType(self.i32, [voidptr_ty], var_arg=True)
         self.printf = ir.Function(self.module, printf_ty, name="printf")
         #strcmp para comparar cadenas por contenido (no por puntero)
-        strcmp_ty = ir.FuncionType(self.i32, [self.i8.as_pointer(), self.i8.as_pointer()])
+        strcmp_ty = ir.FunctionType(self.i32, [self.i8.as_pointer(), self.i8.as_pointer()])
         self.strcmp = ir.Function(self.module, strcmp_ty, name="strcmp")
         # Funcion principal
         tipo_funcion = ir.FunctionType(self.i32, [])
@@ -147,16 +147,16 @@ class CodeGenerator:
             izquierda = self.generar_expresion(nodo.valora)
             derecha = self.generar_expresion(nodo.valorb)
             izquierda, derecha = self._igualar_tipos_binop(izquierda, derecha)
-            es_flotante = izquierda.type in (self.float, self.double)
             operador = nodo.operador.lower()
-            # Aca pasamos las divisiones a flotantes, luego vamos a checkear que el tipo de la izquierda sea compatible, en caso de que no, se convierte al tipo que sea necesario
-            if operador in ("dividido","/"):
-                if izquierda.type == self.i32:
-                    izquierda = self.builder.sitofp(izquierda, self.float, name="div_cast_izq")
-                if derecha.type == self.i32:
-                    derecha = self.builder.sitofp(derecha, self.float, name="div_cast_der")
-            print(izquierda.type)
-            print(derecha.type)
+
+            # La division siempre se calcula en flotante: 5 dividido 2 = 2.5.
+            # Al asignar a una variable entera, _convertir_a_tipo trunca con fptosi.
+            if operador in ("dividido", "/"):
+                tipo_div = self.double if self.double in (izquierda.type, derecha.type) else self.float
+                izquierda = self._convertir_a_tipo(izquierda, tipo_div)
+                derecha = self._convertir_a_tipo(derecha, tipo_div)
+
+            es_flotante = izquierda.type in (self.float, self.double)
             # En el caso de que sea una operacion entre flotantes hay que crear otro builder
             if es_flotante :
                 if operador == "mas":

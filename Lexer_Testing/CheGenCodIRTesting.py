@@ -26,7 +26,8 @@ class TestCodeGenerator(unittest.TestCase):
 
     def setUp(self):
         self.cg = CodeGenerator()
-    def texto_ir(self,modulo=None):
+
+    def texto_ir(self, modulo=None):
         """Devuelve el IR sin las comillas que agrega llvmlite alrededor de los
                nombres, para que las aserciones no dependan de la version de llvmlite."""
         if modulo is None:
@@ -178,7 +179,7 @@ class TestCodeGenerator(unittest.TestCase):
 
         modulo = self.generar([])
 
-        self.assertIn("store i32 100", str(modulo))
+        self.assertIn("store i32 100", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_asignacion_flotante(self):
@@ -187,7 +188,7 @@ class TestCodeGenerator(unittest.TestCase):
 
         modulo = self.generar([])
 
-        self.assertIn("store float", str(modulo))
+        self.assertIn("store float", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_asignacion_doble(self):
@@ -196,7 +197,7 @@ class TestCodeGenerator(unittest.TestCase):
 
         modulo = self.generar([])
 
-        self.assertIn("store double", str(modulo))
+        self.assertIn("store double", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_asignacion_a_variable_no_declarada(self):
@@ -209,7 +210,7 @@ class TestCodeGenerator(unittest.TestCase):
 
         modulo = self.generar([])
 
-        self.assertIn("sitofp", str(modulo))
+        self.assertIn("sitofp", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_conversion_entero_a_doble(self):
@@ -218,7 +219,7 @@ class TestCodeGenerator(unittest.TestCase):
 
         modulo = self.generar([])
 
-        self.assertIn("sitofp", str(modulo))
+        self.assertIn("sitofp", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_conversion_flotante_a_doble(self):
@@ -227,7 +228,7 @@ class TestCodeGenerator(unittest.TestCase):
 
         modulo = self.generar([])
 
-        self.assertIn("fpext", str(modulo))
+        self.assertIn("fpext", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_conversion_doble_a_flotante(self):
@@ -236,7 +237,7 @@ class TestCodeGenerator(unittest.TestCase):
 
         modulo = self.generar([])
 
-        self.assertIn("fptrunc", str(modulo))
+        self.assertIn("fptrunc", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_conversion_flotante_a_entero(self):
@@ -245,7 +246,7 @@ class TestCodeGenerator(unittest.TestCase):
 
         modulo = self.generar([])
 
-        self.assertIn("fptosi", str(modulo))
+        self.assertIn("fptosi", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     # =====================================================
@@ -297,7 +298,6 @@ class TestCodeGenerator(unittest.TestCase):
         self.assertIn("mul i32", str(self.cg.module))
         self.verificar_ir()
 
-    @unittest.expectedFailure
     def test_division_enteros(self):
         """
         Este test debería generar una división float.
@@ -607,48 +607,48 @@ class TestCodeGenerator(unittest.TestCase):
     # =====================================================
 
     def test_imprimir_cadena_literal(self):
-        modulo = self.texto_ir([
+        modulo = self.generar([
             Imprimir("Hola mundo", 1)
         ])
 
-        self.assertIn("Hola mundo", str(modulo))
-        self.assertIn("call i32 (i8*, ...) @printf", str(modulo))
+        self.assertIn("Hola mundo", self.texto_ir(modulo))
+        self.assertIn("call i32 (i8*, ...) @printf", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_imprimir_entero(self):
-        modulo = self.texto_ir([
+        modulo = self.generar([
             Imprimir(self.valor(42), 1)
         ])
 
-        self.assertIn("@fmt_int", str(modulo))
+        self.assertIn("@fmt_int", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_imprimir_flotante(self):
-        modulo = self.texto_ir([
+        modulo = self.generar([
             Imprimir(self.valor(3.14, "flotante"), 1)
         ])
 
-        self.assertIn("@fmt_float", str(modulo))
-        self.assertIn("fpext", str(modulo))
+        self.assertIn("@fmt_float", self.texto_ir(modulo))
+        self.assertIn("fpext", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_imprimir_doble(self):
-        modulo = self.texto_ir([
+        modulo = self.generar([
             Imprimir(self.valor(3.14159, "doble"), 1)
         ])
 
-        self.assertIn("@fmt_float", str(modulo))
+        self.assertIn("@fmt_float", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_imprimir_variable(self):
-        modulo = self.texto_ir([
+        modulo = self.generar([
             Declaracion("entero", ["numero"], 1),
             Asignacion("numero", self.valor(42), 1),
             Imprimir(self.variable("numero"), 1)
         ])
 
-        self.assertIn("cargar_numero", str(modulo))
-        self.assertIn("@printf", str(modulo))
+        self.assertIn("cargar_numero", self.texto_ir(modulo))
+        self.assertIn("@printf", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_imprimir_expresion(self):
@@ -658,12 +658,64 @@ class TestCodeGenerator(unittest.TestCase):
             self.valor(20)
         )
 
-        modulo = self.texto_ir([
+        modulo = self.generar([
             Imprimir(expresion, 1)
         ])
 
-        self.assertIn("add i32", str(modulo))
-        self.assertIn("@printf", str(modulo))
+        self.assertIn("add i32", self.texto_ir(modulo))
+        self.assertIn("@printf", self.texto_ir(modulo))
+        self.verificar_ir(modulo)
+
+    # =====================================================
+    # 9.1 CADENAS
+    # =====================================================
+
+    def test_declarar_cadena(self):
+        modulo = self.generar([
+            Declaracion("cadena", ["s"], 1)
+        ])
+
+        self.assertIn("alloca i8*", self.texto_ir(modulo))
+        self.verificar_ir(modulo)
+
+    def test_asignar_cadena(self):
+        modulo = self.generar([
+            Declaracion("cadena", ["s"], 1),
+            Asignacion("s", self.valor("hola", "cadena"), 1),
+        ])
+
+        self.assertIn("store i8*", self.texto_ir(modulo))
+        self.assertIn("hola", self.texto_ir(modulo))
+        self.verificar_ir(modulo)
+
+    def test_comparar_cadenas_igual(self):
+        modulo = self.generar([
+            Declaracion("cadena", ["s"], 1),
+            InstruccionSi(
+                self.binop(self.variable("s"), "igual", self.valor("a", "cadena")),
+                [Imprimir("iguales", 1)],
+                None,
+                1
+            ),
+        ])
+
+        self.assertIn("call i32 @strcmp", self.texto_ir(modulo))
+        self.assertIn("icmp eq i32", self.texto_ir(modulo))
+        self.verificar_ir(modulo)
+
+    def test_comparar_cadenas_distinto(self):
+        modulo = self.generar([
+            Declaracion("cadena", ["s"], 1),
+            InstruccionSi(
+                self.binop(self.variable("s"), "distinto", self.valor("b", "cadena")),
+                [Imprimir("distintas", 1)],
+                None,
+                1
+            ),
+        ])
+
+        self.assertIn("call i32 @strcmp", self.texto_ir(modulo))
+        self.assertIn("icmp ne i32", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     # =====================================================
@@ -686,9 +738,9 @@ class TestCodeGenerator(unittest.TestCase):
 
         modulo = self.generar([nodo])
 
-        self.assertIn("if_true", str(modulo))
-        self.assertIn("if_false", str(modulo))
-        self.assertIn("if_end", str(modulo))
+        self.assertIn("if_true", self.texto_ir(modulo))
+        self.assertIn("if_false", self.texto_ir(modulo))
+        self.assertIn("if_end", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_if_con_else(self):
@@ -707,8 +759,8 @@ class TestCodeGenerator(unittest.TestCase):
 
         modulo = self.generar([nodo])
 
-        self.assertIn("Verdadero", str(modulo))
-        self.assertIn("Falso", str(modulo))
+        self.assertIn("Verdadero", self.texto_ir(modulo))
+        self.assertIn("Falso", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_if_con_asignaciones(self):
@@ -730,8 +782,8 @@ class TestCodeGenerator(unittest.TestCase):
             nodo
         ])
 
-        self.assertIn("if_true", str(modulo))
-        self.assertIn("if_false", str(modulo))
+        self.assertIn("if_true", self.texto_ir(modulo))
+        self.assertIn("if_false", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     # =====================================================
@@ -767,9 +819,9 @@ class TestCodeGenerator(unittest.TestCase):
             nodo
         ])
 
-        self.assertIn("while_cond", str(modulo))
-        self.assertIn("while_body", str(modulo))
-        self.assertIn("while_end", str(modulo))
+        self.assertIn("while_cond", self.texto_ir(modulo))
+        self.assertIn("while_body", self.texto_ir(modulo))
+        self.assertIn("while_end", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_while_sin_instrucciones(self):
@@ -783,7 +835,7 @@ class TestCodeGenerator(unittest.TestCase):
 
         modulo = self.generar([nodo])
 
-        self.assertIn("while_cond", str(modulo))
+        self.assertIn("while_cond", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     # =====================================================
@@ -801,7 +853,7 @@ class TestCodeGenerator(unittest.TestCase):
         imprimir(resultado)
         """
 
-        modulo = self.texto_ir([
+        modulo = self.generar([
             Declaracion("entero", ["a", "b", "resultado"], 1),
 
             Asignacion("a", self.valor(10), 2),
@@ -820,9 +872,9 @@ class TestCodeGenerator(unittest.TestCase):
             Imprimir(self.variable("resultado"), 5)
         ])
 
-        self.assertIn("add i32", str(modulo))
-        self.assertIn("@printf", str(modulo))
-        self.assertIn("ret i32 0", str(modulo))
+        self.assertIn("add i32", self.texto_ir(modulo))
+        self.assertIn("@printf", self.texto_ir(modulo))
+        self.assertIn("ret i32 0", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_programa_con_if_y_while(self):
@@ -867,8 +919,8 @@ class TestCodeGenerator(unittest.TestCase):
             )
         ])
 
-        self.assertIn("while_cond", str(modulo))
-        self.assertIn("if_true", str(modulo))
+        self.assertIn("while_cond", self.texto_ir(modulo))
+        self.assertIn("if_true", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_programa_con_expresiones_anidadas(self):
@@ -896,9 +948,9 @@ class TestCodeGenerator(unittest.TestCase):
             Imprimir(self.variable("resultado"), 1)
         ])
 
-        self.assertIn("add i32", str(modulo))
-        self.assertIn("sub i32", str(modulo))
-        self.assertIn("mul i32", str(modulo))
+        self.assertIn("add i32", self.texto_ir(modulo))
+        self.assertIn("sub i32", self.texto_ir(modulo))
+        self.assertIn("mul i32", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     # =====================================================
@@ -930,21 +982,21 @@ class TestCodeGenerator(unittest.TestCase):
     # =====================================================
 
     def test_existe_funcion_main(self):
-        modulo = self.texto_ir([])
+        modulo = self.generar([])
 
-        self.assertIn("define i32 @main()", str(modulo))
+        self.assertIn("define i32 @main()", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_existe_printf(self):
-        modulo = self.texto_ir([])
+        modulo = self.generar([])
 
-        self.assertIn("declare i32 @printf", str(modulo))
+        self.assertIn("declare i32 @printf", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_formatos_de_impresion(self):
-        modulo = self.texto_ir([])
+        modulo = self.generar([])
 
-        texto = str(modulo)
+        texto = self.texto_ir(modulo)
 
         self.assertIn("@fmt_int", texto)
         self.assertIn("@fmt_str", texto)
@@ -953,17 +1005,17 @@ class TestCodeGenerator(unittest.TestCase):
         self.verificar_ir(modulo)
 
     def test_generar_programa_recibe_un_nodo_suelto(self):
-        modulo = self.texto_ir(
+        modulo = self.generar(
             Imprimir("Hola", 1)
         )
 
-        self.assertIn("@printf", str(modulo))
+        self.assertIn("@printf", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
     def test_generar_programa_recibe_lista_vacia(self):
         modulo = self.generar([])
 
-        self.assertIn("ret i32 0", str(modulo))
+        self.assertIn("ret i32 0", self.texto_ir(modulo))
         self.verificar_ir(modulo)
 
 
