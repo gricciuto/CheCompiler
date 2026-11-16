@@ -13,7 +13,7 @@ if __name__ == "__main__":
       declaro entero las variables a c punto y coma
       declaro flotante la variable b punto y coma
       a le asigno 10 punto y coma
-      b le asigno 67 punto y coma
+      b le asigno 5 dividido 2 punto y coma
       c le asigno 2 menos menos a punto y coma
       si c mayor 15 entonces comienza
         a le asigno 1 punto y coma
@@ -25,6 +25,7 @@ if __name__ == "__main__":
         a le asigno a menos 1 punto y coma
       termina punto y coma
       imprimo abro parentesis a cierro parentesis punto y coma
+      lo pongo en la epson abro parentesis a cierro parentesis punto y coma
     termina'''
 
     def mostrar_ast(nodo, indent=0):

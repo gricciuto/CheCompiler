@@ -92,12 +92,11 @@ class CodeGenerator:
                 raise Exception(f"Variable ya declarada: {nombre}")
 
             # Siempre reservar en el bloque entry para evitar fallos en while/if
-            # A CHUSMEAR POR ACA EE cuando se pasa una variable como operando no reconoce el tipo
-            #todo
+
             with self.builder.goto_entry_block():
                 direccion = self.builder.alloca(tipo_llvm, name=nombre)
 
-            self.variables[nombre] = direccion
+            self.variables[nombre] =(direccion,tipo_llvm)
 
     # =====================================
     # Generar expresiones
@@ -115,17 +114,15 @@ class CodeGenerator:
             if nodo.tipo == 'cadena':
                 datos = bytearray(nodo.valor.encode("utf-8"))
                 datos.append(0)
-
-                tipo_string = ir.ArrayType(ir.IntType(8), len(datos))
-
-                cadena = ir.GlobalVariable(
-                    self.module,
-                    tipo_string,
-                    name="cadena"
-                )
-
+                tipo_string = ir.ArrayType(self.i8, len(datos))
+                self.contador_str += 1
+                cadena = ir.GlobalVariable(self.module, tipo_string,
+                                           name=f"str_{self.contador_str}")
+                cadena.linkage = "internal"
                 cadena.global_constant = True
-                return ir.Constant(tipo_string, datos)
+                cadena.initializer = ir.Constant(tipo_string, datos)
+                cero = ir.Constant(self.i32, 0)
+                return self.builder.gep(cadena, [cero, cero], inbounds=True)
             else:
                 raise Exception(f"Tipo no soportado: {nodo.tipo}")
         # Variable
@@ -133,7 +130,7 @@ class CodeGenerator:
             if nodo.nombre not in self.variables:
                 raise Exception(f"Variable no declarada: {nodo.nombre}")
 
-            direccion = self.variables[nodo.nombre]
+            direccion,tipo_variable = self.variables[nodo.nombre]
             return self.builder.load(direccion, name=f"cargar_{nodo.nombre}")
 
         # Operacion binaria
@@ -143,6 +140,11 @@ class CodeGenerator:
             izquierda, derecha = self._igualar_tipos_binop(izquierda, derecha)
             es_flotante = izquierda.type in (self.float, self.double)
             operador = nodo.operador.lower()
+            if operador in ("dividido","/"):
+                if izquierda.type == self.i32:
+                    izquierda = self.builder.sitofp(izquierda, self.float, name="div_cast_izq")
+                if derecha.type == self.i32:
+                    derecha = self.builder.sitofp(derecha, self.float, name="div_cast_der")
             print(izquierda.type)
             print(derecha.type)
             # En el caso de que sea una operacion entre flotantes hay que crear otro builder
@@ -201,10 +203,8 @@ class CodeGenerator:
             raise Exception(f"Variable no declarada: {nodo.id}")
 
         valor = self.generar_expresion(nodo.valor)
-        direccion = self.variables[nodo.id]
-        tipo_variable = direccion.type.pointee
-        if valor.type == self.i32 and tipo_variable in (self.float, self.double):
-            valor = self.builder.sitofp(valor, tipo_variable)
+        direccion, tipo_variable = self.variables[nodo.id]
+        valor = self._convertir_a_tipo(valor, tipo_variable)
         self.builder.store(valor, direccion)
 
     # =====================================
@@ -226,14 +226,17 @@ class CodeGenerator:
         # Caso 2: Es una expresion o variable
         else:
             valor = self.generar_expresion(nodo.valor)
-            # Si imprimen una comparacion (i1), pasarla a i32 para printf
-            if valor.type in (self.float, self.double):
+            cero = ir.Constant(self.i32, 0)
+
+            if valor.type == self.i8.as_pointer():
+                ptr_fmt = self.builder.gep(self.fmt_str, [cero, cero], inbounds=True)
+                self.builder.call(self.printf, [ptr_fmt, valor])
+            elif valor.type in (self.float, self.double):
                 if valor.type == self.float:
                     valor = self.builder.fpext(valor, self.double)
                 ptr_fmt = self.builder.gep(self.fmt_float, [cero, cero], inbounds=True)
                 self.builder.call(self.printf, [ptr_fmt, valor])
             else:
-                # Lo que ya tenías para enteros:
                 if valor.type == self.i1:
                     valor = self.builder.zext(valor, self.i32)
                 ptr_fmt = self.builder.gep(self.fmt_int, [cero, cero], inbounds=True)
