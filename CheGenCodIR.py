@@ -50,6 +50,8 @@ class CodeGenerator:
         # De double (64 bits) a float (32 bits)
         if valor.type == self.double and tipo_destino == self.float:
             return self.builder.fptrunc(valor, self.float, name="double_a_float")
+        if valor.type in (self.float, self.double) and tipo_destino == self.i32:
+            return self.builder.fptosi(valor, self.i32, name="float_a_int")
         return valor
 
     def _obtener_tipo_llvm(self, tipo_str):
@@ -140,6 +142,7 @@ class CodeGenerator:
             izquierda, derecha = self._igualar_tipos_binop(izquierda, derecha)
             es_flotante = izquierda.type in (self.float, self.double)
             operador = nodo.operador.lower()
+            # Aca pasamos las divisiones a flotantes, luego vamos a checkear que el tipo de la izquierda sea compatible, en caso de que no, se convierte al tipo que sea necesario
             if operador in ("dividido","/"):
                 if izquierda.type == self.i32:
                     izquierda = self.builder.sitofp(izquierda, self.float, name="div_cast_izq")

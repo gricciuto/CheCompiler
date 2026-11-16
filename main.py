@@ -19,7 +19,7 @@ if __name__ == "__main__":
         a le asigno 1 punto y coma
       termina punto y coma
       sino comienza
-        b le asigno 2 mas 3 punto 6 punto y coma
+        b le asigno 2 punto y coma
       termina punto y coma
       mientras a mayor b comienza
         a le asigno a menos 1 punto y coma
