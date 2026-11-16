@@ -1,4 +1,4 @@
-
+import re
 import unittest
 
 from llvmlite import binding
@@ -26,6 +26,12 @@ class TestCodeGenerator(unittest.TestCase):
 
     def setUp(self):
         self.cg = CodeGenerator()
+    def texto_ir(self,modulo=None):
+        """Devuelve el IR sin las comillas que agrega llvmlite alrededor de los
+               nombres, para que las aserciones no dependan de la version de llvmlite."""
+        if modulo is None:
+            modulo = self.cg.module
+        return re.sub(r'([@%])"([^"]*)"', r"\1\2", str(modulo))
 
     def valor(self, value, tipo="entero"):
         return Valor(value, tipo, 1)
@@ -601,7 +607,7 @@ class TestCodeGenerator(unittest.TestCase):
     # =====================================================
 
     def test_imprimir_cadena_literal(self):
-        modulo = self.generar([
+        modulo = self.texto_ir([
             Imprimir("Hola mundo", 1)
         ])
 
@@ -610,7 +616,7 @@ class TestCodeGenerator(unittest.TestCase):
         self.verificar_ir(modulo)
 
     def test_imprimir_entero(self):
-        modulo = self.generar([
+        modulo = self.texto_ir([
             Imprimir(self.valor(42), 1)
         ])
 
@@ -618,7 +624,7 @@ class TestCodeGenerator(unittest.TestCase):
         self.verificar_ir(modulo)
 
     def test_imprimir_flotante(self):
-        modulo = self.generar([
+        modulo = self.texto_ir([
             Imprimir(self.valor(3.14, "flotante"), 1)
         ])
 
@@ -627,7 +633,7 @@ class TestCodeGenerator(unittest.TestCase):
         self.verificar_ir(modulo)
 
     def test_imprimir_doble(self):
-        modulo = self.generar([
+        modulo = self.texto_ir([
             Imprimir(self.valor(3.14159, "doble"), 1)
         ])
 
@@ -635,7 +641,7 @@ class TestCodeGenerator(unittest.TestCase):
         self.verificar_ir(modulo)
 
     def test_imprimir_variable(self):
-        modulo = self.generar([
+        modulo = self.texto_ir([
             Declaracion("entero", ["numero"], 1),
             Asignacion("numero", self.valor(42), 1),
             Imprimir(self.variable("numero"), 1)
@@ -652,7 +658,7 @@ class TestCodeGenerator(unittest.TestCase):
             self.valor(20)
         )
 
-        modulo = self.generar([
+        modulo = self.texto_ir([
             Imprimir(expresion, 1)
         ])
 
@@ -795,7 +801,7 @@ class TestCodeGenerator(unittest.TestCase):
         imprimir(resultado)
         """
 
-        modulo = self.generar([
+        modulo = self.texto_ir([
             Declaracion("entero", ["a", "b", "resultado"], 1),
 
             Asignacion("a", self.valor(10), 2),
@@ -924,19 +930,19 @@ class TestCodeGenerator(unittest.TestCase):
     # =====================================================
 
     def test_existe_funcion_main(self):
-        modulo = self.generar([])
+        modulo = self.texto_ir([])
 
         self.assertIn("define i32 @main()", str(modulo))
         self.verificar_ir(modulo)
 
     def test_existe_printf(self):
-        modulo = self.generar([])
+        modulo = self.texto_ir([])
 
         self.assertIn("declare i32 @printf", str(modulo))
         self.verificar_ir(modulo)
 
     def test_formatos_de_impresion(self):
-        modulo = self.generar([])
+        modulo = self.texto_ir([])
 
         texto = str(modulo)
 
@@ -947,7 +953,7 @@ class TestCodeGenerator(unittest.TestCase):
         self.verificar_ir(modulo)
 
     def test_generar_programa_recibe_un_nodo_suelto(self):
-        modulo = self.generar(
+        modulo = self.texto_ir(
             Imprimir("Hola", 1)
         )
 

@@ -14,12 +14,13 @@ class CodeGenerator:
         self.i1 = ir.IntType(1)
         self.float = ir.FloatType()
         self.double = ir.DoubleType()
-        self.string = ir.ArrayType(self.i8, 0)
         # Declarar printf externo (de C) para que funcione generar_imprimir
         voidptr_ty = self.i8.as_pointer()
         printf_ty = ir.FunctionType(self.i32, [voidptr_ty], var_arg=True)
         self.printf = ir.Function(self.module, printf_ty, name="printf")
-
+        #strcmp para comparar cadenas por contenido (no por puntero)
+        strcmp_ty = ir.FuncionType(self.i32, [self.i8.as_pointer(), self.i8.as_pointer()])
+        self.strcmp = ir.Function(self.module, strcmp_ty, name="strcmp")
         # Funcion principal
         tipo_funcion = ir.FunctionType(self.i32, [])
         self.funcion = ir.Function(self.module, tipo_funcion, name="main")
@@ -36,7 +37,7 @@ class CodeGenerator:
         self.fmt_int = self._crear_constante_str("%d\n\0", "fmt_int")
         self.fmt_str = self._crear_constante_str("%s\n\0", "fmt_str")
         self.fmt_float = self._crear_constante_str("%g\n\0", "fmt_float")
-
+        self.str_vacia = self._crear_constante_str("\0", "str_vacia")
     def _convertir_a_tipo(self, valor, tipo_destino):
         """Convierte un valor LLVM (ej: i32) al tipo_destino (ej: float o double) si no coinciden."""
         if valor.type == tipo_destino:
@@ -61,6 +62,8 @@ class CodeGenerator:
             return self.float
         elif tipo_str == "doble":
             return self.double
+        elif tipo_str == "cadena":
+            return self.i8.as_pointer()
         else:
             raise Exception(f"Tipo no soportado en LLVM: {tipo_str}")
 
@@ -97,6 +100,10 @@ class CodeGenerator:
 
             with self.builder.goto_entry_block():
                 direccion = self.builder.alloca(tipo_llvm, name=nombre)
+                if tipo_llvm == self.i8.as_pointer():
+                    cero = ir.Constant(self.i32, 0)
+                    ptr_vacio = self.builder.gep(self.str_vacia, [cero, cero], inbounds=True)
+                    self.builder.store(ptr_vacio, direccion)
 
             self.variables[nombre] =(direccion,tipo_llvm)
 
@@ -183,6 +190,18 @@ class CodeGenerator:
             }
             if operador in mapa_cmp:
                 simbolo = mapa_cmp[operador]
+
+                if izquierda.type == self.i8.as_pointer():
+                    resultado = self.builder.call(self.strcmp, [izquierda, derecha])
+                    cero_i32 = ir.Constant(self.i32, 0)
+                    if operador == "igual":
+                        return self.builder.icmp_signed("==", resultado, cero_i32)
+                    elif operador == "distinto":
+                        return self.builder.icmp_signed("!=", resultado, cero_i32)
+                    raise Exception(
+                        f"Comparación '{operador}' no soportada entre cadenas"
+                    )
+
                 if es_flotante:
                     return self.builder.fcmp_ordered(simbolo, izquierda, derecha)
                 else:
