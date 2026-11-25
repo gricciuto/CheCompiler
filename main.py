@@ -15,21 +15,10 @@ if __name__ == "__main__":
 
     codigo = '''comienza
       declaro entero las variables a c punto y coma
-      declaro flotante la variable b punto y coma
       a le asigno 10 punto y coma
-      b le asigno 5 dividido 2 punto y coma
-      c le asigno 2 menos menos a punto y coma
-      si c mayor 15 entonces comienza
-        a le asigno 1 punto y coma
-      termina punto y coma
-      sino comienza
-        b le asigno 2 punto y coma
-      termina punto y coma
-      mientras a mayor b comienza
-        a le asigno a menos 1 punto y coma
-      termina punto y coma
+      c le asigno 2 punto y coma
       imprimo abro parentesis a cierro parentesis punto y coma
-      lo pongo en la epson abro parentesis a cierro parentesis punto y coma
+      imprimo abro parentesis 3 cierro parentesis punto y coma
     termina'''
 
     def mostrar_ast(nodo, indent=0):
@@ -114,5 +103,5 @@ if __name__ == "__main__":
     print("=" * 50)
     print(module)
     # compilacion a ejecutable
-    ruta = CheCompiladorLLVM.compilar(module, "salida/prueba")
+    ruta = CheCompiladorLLVM.compilar(module, "salida/peru.exe")
     print("Ejecutable generado:", ruta.resolve())
