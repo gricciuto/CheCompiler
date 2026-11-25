@@ -1,9 +1,13 @@
+import CheCompiladorLLVM
+
 if __name__ == "__main__":
     import sys
     from CheLexer import CheLexer
     from CheParser import CheParser
     from CheChecker import check_program, SemanticError
     from CheGenCodIR import CodeGenerator
+    from CheCompiladorLLVM import *
+
 
     lexer = CheLexer()
     parser = CheParser()
@@ -106,6 +110,7 @@ if __name__ == "__main__":
     # Generacion de codigo IR
     
     module = generador.generar_programa(ast)
+    CheCompiladorLLVM.compilar(module, "salida\prueba")
     print("LLVM IR Generado:")
     print("=" * 50)
     print(module)
