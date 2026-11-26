@@ -19,6 +19,12 @@ if __name__ == "__main__":
       c le asigno 2 punto y coma
       imprimo abro parentesis a cierro parentesis punto y coma
       imprimo abro parentesis 3 cierro parentesis punto y coma
+      declaro entero la funcion jajaja abro parentesis entero d cierro parentesis 
+        comienza
+        declaro entero la variable g punto y coma
+        g le asigno 10 punto y coma
+        imprimo abro parentesis g cierro parentesis punto y coma
+        termina punto y coma
     termina'''
 
     def mostrar_ast(nodo, indent=0):

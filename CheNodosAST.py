@@ -56,9 +56,16 @@ class Declaracion (Nodo):
         self.tipo = tipo
         self.lista_variables = lista_variables
         self.lineno = lineno
+class DeclaracionFuncion(Nodo):
+    def __init__(self, tipo, nombre, parametros, cuerpo, lineno=None):
+        self.tipo = tipo
+        self.nombre = nombre
+        self.parametros = parametros
+        self.cuerpo = cuerpo
+        self.lineno = lineno
 
     def imprimir(self):
-        print("DECLARO TIPO: ", self.tipo, " VARIABLES: ", self.lista_variables)
+        print(f"FUNCION {self.nombre} -> {self.tipo} | PARAMS: {self.parametros}")
 class Imprimir(Nodo):
     def __init__(self,valor, lineno = None):
         #deberiamos poder pasarle una variable tambien para que la imprima, o una expresion

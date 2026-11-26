@@ -226,6 +226,54 @@ class CheCheckerTester(unittest.TestCase):
         self.assertEqual(nodo.tipo, "entero")
 
     # =====================================================
+    # Funciones
+    # =====================================================
+
+    def test_declaracion_funcion_valida(self):
+        nodo = DeclaracionFuncion("entero", "suma", ["a", "b"], [])
+        self.checker.visit(nodo)
+
+        self.assertIn("suma", self.checker.funciones)
+        self.assertEqual(len(self.checker.errores), 0)
+
+    def test_declaracion_funcion_duplicada(self):
+        self.checker.visit(DeclaracionFuncion("entero", "suma", [], []))
+        self.checker.visit(DeclaracionFuncion("flotante", "suma", [], []))
+
+        self.assertEqual(len(self.checker.errores), 1)
+        self.assertIn("ya fue declarada", self.checker.errores[0])
+
+    def test_declaracion_funcion_tipo_retorno_invalido(self):
+        nodo = DeclaracionFuncion("booleano", "f", [], [])
+        self.checker.visit(nodo)
+
+        self.assertEqual(len(self.checker.errores), 1)
+
+    def test_declaracion_funcion_parametros_scope_local(self):
+        cuerpo = [Imprimir(Variable("a", 1))]
+        nodo = DeclaracionFuncion("entero", "f", ["a"], cuerpo)
+        self.checker.visit(nodo)
+
+        self.assertEqual(len(self.checker.errores), 0)
+        self.assertNotIn("a", self.checker.symbols)
+
+    def test_invocacion_funcion_declarada(self):
+        self.checker.visit(DeclaracionFuncion("flotante", "f", [], []))
+
+        nodo = Invocacion("f", self.valor(1))
+        self.checker.visit(nodo)
+
+        self.assertEqual(nodo.tipo, "flotante")
+        self.assertEqual(len(self.checker.errores), 0)
+
+    def test_invocacion_funcion_no_declarada(self):
+        nodo = Invocacion("g", self.valor(1))
+        self.checker.visit(nodo)
+
+        self.assertIsNone(nodo.tipo)
+        self.assertEqual(len(self.checker.errores), 1)
+
+    # =====================================================
     # Función auxiliar
     # =====================================================
 

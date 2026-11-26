@@ -3,8 +3,8 @@ from sly import Lexer
 class CheLexer(Lexer):
     # nombres de los tokens. 
     tokens = {MAS,MENOS,POR,DIVISION,IGUAL,PARENTESIS_IZQ,PARENTESIS_DER,
-              NUMERO, PUNTO_Y_COMA, ASIGNACION, IF, ELSE,THEN, WHILE, FUNCION, MAYOR, MENOR,
-              MAYOR_IGUAL,DISTINTO, MENOR_IGUAL, TIPO, LLAVE_IZQ, LLAVE_DER, CADENA, IMPRIMIR, BEGIN, END, ID, Y, INVOCO,CON_PARAMETROS,DECLARO,LAS_VARIABLES, PUNTO, COMA}
+              NUMERO, PUNTO_Y_COMA, ASIGNACION, IF, ELSE,THEN, WHILE, MAYOR, MENOR,
+              MAYOR_IGUAL,DISTINTO, MENOR_IGUAL, TIPO, CADENA, IMPRIMIR, BEGIN, END, ID, Y, INVOCO,CON_PARAMETROS,DECLARO,LAS_VARIABLES, PUNTO, COMA, LA_FUNCION}
     ignore = ' \t' 
     ignore_comment = r'\#.*'
     @_(r'\bes\b|\bque\b')
@@ -15,6 +15,7 @@ class CheLexer(Lexer):
     INVOCO = r'\b(?:invoco|llamo a)\b'
     DECLARO =r'\b(?:declaro|se declara|se presentan|aparecieron|se declaran)\b'
     LAS_VARIABLES =  r'\b(?:las variables|la variable)\b'
+    LA_FUNCION = r'\bla funcion\b'
     Y = r'\by\b'
     MAS = r'\bmas\b'
     MENOS = r'\bmenos\b'
@@ -37,15 +38,12 @@ class CheLexer(Lexer):
     IF = r'\bsi\b'
     THEN = r'\bentonces\b'
     WHILE = r'\bmientras\b'
-    FUNCION = r'\bfuncion\b'
     MAYOR_IGUAL = r'\bmayor igual\b'
     DISTINTO = r'\bdistinto\b'
     MENOR_IGUAL = r'\bmenor igual\b'
     MAYOR = r'\bmayor\b'
     MENOR = r'\bmenor\b'
     TIPO = r'\b(?:entero|flotante|cadena|doble)\b' # dejamos estos tipos nomas, estamos abierto a cambios .
-    LLAVE_IZQ = r'\babro llave\b'
-    LLAVE_DER = r'\bcierro llave\b'
     IMPRIMIR = r'\b(?:imprimo|lo pongo en la epson|mostrar por pantalla|pantalleame|escupi)\b'
     BEGIN = r'\bcomienza\b'
     END = r'\btermina\b'

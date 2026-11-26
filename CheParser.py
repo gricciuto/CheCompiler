@@ -37,9 +37,19 @@ class CheParser(Parser):
     @_('DECLARO TIPO LAS_VARIABLES listavariables')
     def declaracion(self,p):
         return ast.Declaracion(p.TIPO,p.listavariables, lineno= p.lineno)
-    @_('TIPO')
-    def tipo(self,p):
-        return p.TIPO
+    @_('DECLARO TIPO LA_FUNCION ID PARENTESIS_IZQ listaparametros PARENTESIS_DER bloque')
+    def declaracion(self,p):
+        return ast.DeclaracionFuncion(p.TIPO,p.ID,p.listaparametros,p.bloque, lineno=p.lineno)
+    @_('')
+    def listaparametros(self, p):
+        return []
+    @_('listaparametros parametro')
+    def listaparametros(self, p):
+        p.listaparametros.append(p.parametro)
+        return p.listaparametros
+    @_('TIPO ID')
+    def parametro(self, p):
+        return (p.TIPO, p.ID)
     @_('ID', 'listavariables ID')
     def listavariables(self, p):
         if len(p) == 1:

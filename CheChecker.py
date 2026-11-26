@@ -9,6 +9,8 @@ class CheckProgramVisitor(NodeVisitor):
     def __init__(self):
         # Tabla de símbolos: { nombre_variable: nodo_Declaracion }
         self.symbols = {}
+        # Tabla de funciones: { nombre_funcion: nodo_DeclaracionFuncion }
+        self.funciones = {}
         self.errores = []
 
         # Tipos permitidos según tu CheLexer
@@ -65,6 +67,42 @@ class CheckProgramVisitor(NodeVisitor):
                     node.lineno,
                     f"No se puede asignar un valor de tipo '{tipo_val}' a la variable '{node.id}' de tipo '{tipo_var}'."
                 )
+
+    # =========================================================
+    # 1.b Declaración de funciones
+    # =========================================================
+
+    def visit_DeclaracionFuncion(self, node):
+        # 1. No se puede declarar dos veces la misma función
+        if node.nombre in self.funciones:
+            previa = self.funciones[node.nombre]
+            msg_linea = f" en la línea {previa.lineno}" if previa.lineno else ""
+            self.registrar_error(
+                node.lineno,
+                f"La función '{node.nombre}' ya fue declarada{msg_linea}."
+            )
+            return
+
+        # 2. El tipo de retorno tiene que ser un tipo válido
+        if node.tipo not in self.tipos_validos:
+            self.registrar_error(node.lineno, f"Tipo de retorno desconocido '{node.tipo}'.")
+            return
+
+        # 3. Registrar la firma antes de visitar el cuerpo (permite recursión)
+        self.funciones[node.nombre] = node
+
+        # 4. El cuerpo se chequea en un scope propio: los parámetros son variables locales.
+        #    La gramática todavía no les asigna tipo, así que se registran como tipo None
+        #    (desconocido) para no disparar errores en cascada dentro del cuerpo.
+        scope_anterior = self.symbols
+        self.symbols = {}
+        try:
+            for tipo_param, nombre_param in node.parametros:
+                self.symbols[nombre_param] = Declaracion(tipo_param, [nombre_param], lineno=node.lineno)
+            self.visit(node.cuerpo)
+        finally:
+            # 5. Al salir de la función se descarta el scope local
+            self.symbols = scope_anterior
 
     # =========================================================
     # 2. Expresiones: Valores, Variables, Negativo y BinOp
@@ -191,8 +229,14 @@ class CheckProgramVisitor(NodeVisitor):
 
     def visit_Invocacion(self, node):
         self.visit(node.argumento)
-        # Como la gramática aún no tiene declaración de funciones, asumimos retorno entero por defecto
-        node.tipo = "entero"
+
+        # El tipo de la invocación es el tipo de retorno de la función declarada
+        if node.nombre not in self.funciones:
+            node.tipo = None
+            self.registrar_error(node.lineno, f"La función '{node.nombre}' no fue declarada.")
+            return
+
+        node.tipo = self.funciones[node.nombre].tipo
 
 
 # =========================================================

@@ -52,6 +52,7 @@ def generar_objeto(modulo_ir, ruta_objeto, opt=0):
 
 def buscar_linker():
     """Devuelve una funcion que arma el comando de link, o None si no hay linker."""
+    #TODO deberiamos usar siempre clang y ponerlo dentro de la carpeta del proyecto o como requisito en el instalador
     clang = shutil.which("clang")
     if clang:
         return lambda obj, exe: [clang, obj, "-o", exe]
